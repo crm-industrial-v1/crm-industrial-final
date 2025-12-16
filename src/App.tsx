@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Users, UserPlus, Search, Trash2, Edit, 
   Phone, Briefcase, Save, Calendar, Factory, Package, Menu, 
   Loader2, CheckCircle2, X, Clock, ArrowRight, 
-  ArrowLeft, Target, FileText, LogOut
+  ArrowLeft, Target, FileText, ChevronDown
 } from 'lucide-react';
 
 // --- CONSTANTES ---
@@ -107,10 +107,8 @@ export default function App() {
     const pending = contacts.filter(c => c.next_action_date && c.next_action_date <= today).length;
 
     return (
-      <div className="space-y-6 animate-in fade-in duration-500 w-full">
+      <div className="space-y-6 animate-in fade-in duration-500 w-full overflow-hidden">
         <h2 className="text-xl md:text-2xl font-bold text-slate-800 px-1">Panel de Control</h2>
-        
-        {/* KPIs Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 w-full">
           <Card className="p-4 border-l-4 border-l-blue-600 flex justify-between items-center">
              <div><p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Total Registros</p><h3 className="text-2xl font-bold text-slate-900 mt-1">{total}</h3></div>
@@ -174,7 +172,7 @@ export default function App() {
     );
 
     return (
-      <div className="space-y-4 animate-in fade-in duration-500 pb-20 w-full">
+      <div className="space-y-4 animate-in fade-in duration-500 pb-20 w-full overflow-hidden">
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
            <div className="w-full md:w-auto">
              <h2 className="text-xl font-bold text-slate-800">Base de Datos</h2>
@@ -300,8 +298,11 @@ export default function App() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
+    // Helper para el título de la pestaña activa en móvil
+    const activeTabLabel = TABS.find(t => t.id === activeTab)?.label;
+
     return (
-      <div className="max-w-5xl mx-auto pb-32 w-full">
+      <div className="max-w-5xl mx-auto pb-32 w-full overflow-hidden">
         {/* Header Fijo */}
         <div className="flex flex-col md:flex-row justify-between mb-4 sticky top-0 bg-slate-100/95 z-30 p-4 -mx-2 md:-mx-4 backdrop-blur-md border-b border-slate-200">
            <div className="mb-3 md:mb-0">
@@ -316,25 +317,45 @@ export default function App() {
            </div>
         </div>
 
-        {/* Tabs Scrolleables */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 mb-6 p-1 flex overflow-x-auto no-scrollbar sticky top-[85px] z-20 w-full">
-            {TABS.map(tab => (
-                <button 
-                    key={tab.id} 
-                    onClick={() => setActiveTab(tab.id)} 
-                    className={`flex-1 min-w-[90px] md:min-w-[120px] flex flex-col items-center justify-center p-2 rounded-lg transition-all text-[10px] md:text-sm gap-1 border shrink-0 ${
-                        activeTab === tab.id 
-                        ? 'bg-blue-50 border-blue-200 text-blue-700 font-bold' 
-                        : 'bg-white border-transparent text-slate-500'
-                    }`}
-                >
-                    <tab.icon size={18} className={activeTab === tab.id ? 'text-blue-600' : 'text-slate-400'}/>
-                    <span className="whitespace-normal text-center leading-none">{tab.label}</span>
-                </button>
-            ))}
+        {/* NAVEGACIÓN RESPONSIVA: Dropdown en Móvil / Tabs en PC */}
+        <div className="sticky top-[85px] z-20 mb-6 bg-slate-100 pt-2 pb-2">
+            
+            {/* VERSIÓN MÓVIL: SELECTOR DROPDOWN */}
+            <div className="md:hidden px-1">
+                <div className="relative">
+                    <select 
+                        className="w-full p-3 pl-10 border border-blue-200 rounded-lg bg-white text-slate-800 font-bold appearance-none shadow-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                        value={activeTab}
+                        onChange={(e) => setActiveTab(e.target.value)}
+                    >
+                        {TABS.map(tab => <option key={tab.id} value={tab.id}>{tab.label}</option>)}
+                    </select>
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-600 pointer-events-none">
+                        <ChevronDown size={20} />
+                    </div>
+                </div>
+            </div>
+
+            {/* VERSIÓN ESCRITORIO: PESTAÑAS HORIZONTALES */}
+            <div className="hidden md:flex bg-white rounded-xl shadow-sm border border-slate-200 p-2 overflow-x-auto no-scrollbar mx-1">
+                {TABS.map(tab => (
+                    <button 
+                        key={tab.id} 
+                        onClick={() => setActiveTab(tab.id)} 
+                        className={`flex-1 min-w-[120px] flex flex-col items-center justify-center p-3 rounded-lg transition-all text-sm gap-2 border ${
+                            activeTab === tab.id 
+                            ? 'bg-blue-50 border-blue-200 text-blue-700 font-bold shadow-sm' 
+                            : 'bg-white border-transparent text-slate-500 hover:bg-slate-50 hover:text-slate-700'
+                        }`}
+                    >
+                        <tab.icon size={22} className={activeTab === tab.id ? 'text-blue-600' : 'text-slate-400'}/>
+                        <span className="whitespace-normal text-center leading-tight">{tab.label}</span>
+                    </button>
+                ))}
+            </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6 w-full">
+        <form onSubmit={handleSubmit} className="space-y-6 w-full px-1">
             {activeTab === 'sap' && (
                 <Card className="p-4 md:p-8">
                     <SectionHeader title="Identificación SAP" icon={Search} />
@@ -509,7 +530,7 @@ export default function App() {
              <button onClick={() => { setEditingContact(null); setView('form'); if(window.innerWidth < 1024) setIsSidebarOpen(false); }} className={navBtnClass(view === 'form')}><UserPlus size={20}/> <span>Nuevo Diagnóstico</span></button>
           </nav>
           <div className="p-4 bg-slate-950 text-xs text-slate-500 text-center border-t border-slate-800">
-             v3.0.2 Mobile Fix
+             v3.0.3 Mobile Tabs
           </div>
        </aside>
 
