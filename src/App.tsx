@@ -268,22 +268,39 @@ export default function App() {
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       setSaving(true);
-      const payload = { ...formData };
+      const payload: any = { ...formData };
+      
+      // Limpieza de lógica interna
       for(let i=2; i<=7; i++) delete payload[`hasMat${i}`];
-      delete payload.id; delete payload.created_at;
+      delete payload.id; 
+      delete payload.created_at;
+
+      // --- SANITIZACIÓN (SOLUCIÓN ERROR FECHAS) ---
+      if (!payload.next_action_date) payload.next_action_date = null;
+      if (!payload.next_action_time) payload.next_action_time = null;
+      // -------------------------------------------
 
       let error;
-      if (editingContact) {
-        const res = await supabase.from('industrial_contacts').update(payload).eq('id', editingContact.id);
-        error = res.error;
-      } else {
-        const res = await supabase.from('industrial_contacts').insert([payload]);
-        error = res.error;
-      }
+      try {
+        if (editingContact) {
+            const res = await supabase.from('industrial_contacts').update(payload).eq('id', editingContact.id);
+            error = res.error;
+        } else {
+            const res = await supabase.from('industrial_contacts').insert([payload]);
+            error = res.error;
+        }
 
-      setSaving(false);
-      if (!error) { fetchContacts(); setView('list'); } 
-      else { alert('Error: ' + error.message); }
+        if (!error) { 
+            await fetchContacts(); 
+            setView('list'); 
+        } else { 
+            throw error; 
+        }
+      } catch(err: any) {
+        alert('Error al guardar: ' + err.message);
+      } finally {
+        setSaving(false);
+      }
     };
 
     const goToNextTab = () => {
@@ -313,7 +330,7 @@ export default function App() {
            </div>
         </div>
 
-        {/* TABS HEADER */}
+        {/* TABS HEADER - FONDO BLANCO Y DOS LÍNEAS */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 p-2 flex overflow-x-auto no-scrollbar sticky top-24 z-20 mx-1">
             {TABS.map(tab => (
                 <button 
@@ -352,7 +369,7 @@ export default function App() {
                 </Card>
             )}
 
-            {/* 2. REGISTRO (CON CARGO AÑADIDO) */}
+            {/* 2. REGISTRO (CON CARGO) */}
             {activeTab === 'registro' && (
                 <Card className="p-8">
                     <SectionHeader title="Datos de Registro" icon={Briefcase} subtitle="Información fiscal y contacto principal" />
@@ -361,7 +378,7 @@ export default function App() {
                         <div><label className={labelClass}>CIF / NIF *</label><input required className={inputClass} placeholder="B-12345678" value={formData.cif} onChange={e => handleChange('cif', e.target.value)} /></div>
                         <div><label className={labelClass}>Persona Contacto</label><input className={inputClass} placeholder="Nombre y Apellido" value={formData.contact_person} onChange={e => handleChange('contact_person', e.target.value)} /></div>
                         
-                        {/* AQUÍ ESTÁ EL NUEVO CAMPO CARGO */}
+                        {/* CAMPO CARGO */}
                         <div><label className={labelClass}>Cargo</label><input className={inputClass} placeholder="Ej: Jefe de Compras" value={formData.job_title} onChange={e => handleChange('job_title', e.target.value)} /></div>
                         
                         <div><label className={labelClass}>Teléfono</label><input className={inputClass} placeholder="+34 600..." value={formData.phone} onChange={e => handleChange('phone', e.target.value)} /></div>
