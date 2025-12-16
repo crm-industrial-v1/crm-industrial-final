@@ -314,25 +314,25 @@ export default function App() {
            </div>
         </div>
 
-        {/* NAVEGACIÓN TABS: GRID PARA MÓVIL (2 Filas) / FLEX PARA PC */}
+        {/* NAVEGACIÓN TABS: GRID (Solución definitiva para Scroll) */}
         <div className="sticky top-[85px] z-20 mb-6 bg-slate-100 pt-2 pb-2">
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-1">
-                <div className="grid grid-cols-4 md:flex md:overflow-x-auto md:no-scrollbar gap-1">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-2">
+                {/* AQUÍ ESTÁ EL CAMBIO: grid-cols-4 obliga a partirse en filas */}
+                <div className="grid grid-cols-4 md:flex md:gap-2 gap-1">
                     {TABS.map(tab => (
                         <button 
                             key={tab.id} 
                             onClick={() => setActiveTab(tab.id)} 
-                            className={`flex flex-col items-center justify-center p-2 rounded-lg transition-all text-[10px] md:text-sm gap-1 border shrink-0 ${
+                            className={`flex flex-col items-center justify-center p-2 rounded-lg transition-all text-[10px] md:text-sm gap-1 border ${
                                 activeTab === tab.id 
-                                ? 'bg-blue-50 border-blue-200 text-blue-700 font-bold' 
+                                ? 'bg-blue-50 border-blue-200 text-blue-700 font-bold shadow-sm' 
                                 : 'bg-white border-transparent text-slate-500 hover:bg-slate-50'
                             } ${
-                                // Estilo específico para móvil: altura mínima para que sean fáciles de tocar
-                                'min-h-[60px] md:min-w-[120px]'
+                                'min-h-[55px] md:min-w-[120px]'
                             }`}
                         >
                             <tab.icon size={18} className={`mb-0.5 ${activeTab === tab.id ? 'text-blue-600' : 'text-slate-400'}`}/>
-                            <span className="whitespace-normal text-center leading-none px-0.5">{tab.label}</span>
+                            <span className="whitespace-normal text-center leading-none px-0.5 break-words w-full">{tab.label}</span>
                         </button>
                     ))}
                 </div>
@@ -514,7 +514,7 @@ export default function App() {
              <button onClick={() => { setEditingContact(null); setView('form'); if(window.innerWidth < 1024) setIsSidebarOpen(false); }} className={navBtnClass(view === 'form')}><UserPlus size={20}/> <span>Nuevo Diagnóstico</span></button>
           </nav>
           <div className="p-4 bg-slate-950 text-xs text-slate-500 text-center border-t border-slate-800">
-             v3.0.4 Grid Fix
+             v4.0 - FINAL
           </div>
        </aside>
 
